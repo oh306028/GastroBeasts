@@ -14,10 +14,10 @@ namespace App.Entities
         public string Description { get; set; } 
 
 
-
+            
         public virtual Address Address { get; set; }
 
-        public virtual List<Category> Categories { get; set; } = new List<Category>();
+        public virtual List<RestaurantCategory> RestaurantCategories { get; set; } = new List<RestaurantCategory>();
 
         public virtual List<Review> Reviews { get; set; } = new List<Review>();
 

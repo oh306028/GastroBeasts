@@ -11,8 +11,10 @@ namespace App.Entities
         public int Star { get; set; }
 
 
+        [Required, MaxLength(15)]
+        public string Rating { get; set; }  
 
-        public int ReviewId { get; set; }   
-        public virtual Review Review { get; set; } 
+
+        public virtual List<Review> Reviews { get; set; } = new List<Review>(); 
     }
 }

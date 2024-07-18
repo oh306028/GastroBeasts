@@ -10,11 +10,7 @@ namespace App.Entities
         public string Name { get; set; }
 
 
-
-        public int RestaurantId { get; set; }   
-        public virtual Restaurant Restaurant{ get; set; }
-
-
+        public virtual List<RestaurantCategory> RestaurantCategories { get; set; } = new List<RestaurantCategory>();
 
 
         public virtual List<TopDish> TopDish { get; set; } = new List<TopDish>();

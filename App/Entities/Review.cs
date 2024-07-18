@@ -12,8 +12,11 @@ namespace App.Entities
         [Required]
         public DateTime PostTime { get; set; }  
 
+
+
         [Required]  
         public virtual Stars Stars { get; set; }
+        public int StarsId { get; set; }    
 
 
         public int RestaurantId { get; set; }   
