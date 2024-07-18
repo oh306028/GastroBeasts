@@ -1,6 +1,8 @@
-﻿using App.Dtos;
+﻿using App.Dtos.CreateDtos;
+using App.Dtos.DisplayDtos;
 using App.Entities;
 using App.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace App.Controllers
@@ -34,6 +36,15 @@ namespace App.Controllers
         }
 
 
+        [HttpPost]
+        [Authorize(Roles = "Admin")]
+        public ActionResult<int> CreateRestaurant([FromBody] CreateRestaurantDto dto)
+        {
+            int createdRestaurantId = _restaurantService.CreateRestaurant(dto);
+
+            return Created($"api/restaurants/{createdRestaurantId}", null);
+
+        }
 
 
     }

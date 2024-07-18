@@ -1,4 +1,5 @@
-﻿using App.Dtos;
+﻿using App.Dtos.CreateDtos;
+using App.Dtos.DisplayDtos;
 using App.Entities;
 using App.Exceptions;
 using AutoMapper;
@@ -10,6 +11,7 @@ namespace App.Services
     {
         IEnumerable<RestaurantDto> GetAllRestaurants();
         RestaurantDto GetRestaurantById(int id);
+        int CreateRestaurant(CreateRestaurantDto dto);
     }   
 
     public class RestaurantService : IRestaurantService
@@ -23,6 +25,15 @@ namespace App.Services
             _mapper = mapper;
         }
 
+        public int CreateRestaurant(CreateRestaurantDto dto)
+        {
+            var createdRestaurant = _mapper.Map<Restaurant>(dto);
+
+            _dbContext.Restaurants.Add(createdRestaurant);
+            _dbContext.SaveChanges();
+
+            return createdRestaurant.Id;
+        }
 
         public IEnumerable<RestaurantDto> GetAllRestaurants()
         {
