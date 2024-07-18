@@ -17,7 +17,7 @@ namespace App
         public DbSet<Category> Categories{ get; set; }
         public DbSet<Review> Reviews{ get; set; }
         public DbSet<Restaurant> Restaurants { get; set; }
-
+        public DbSet<RestaurantCategory> RestaurantCategories{ get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -26,10 +26,7 @@ namespace App
 
             modelBuilder.Entity<Restaurant>(r =>
             {
-                r.HasMany(c => c.Categories)
-                .WithOne(r => r.Restaurant)
-                .HasForeignKey(k => k.RestaurantId);
-
+                
                 r.HasMany(r => r.Reviews)
                 .WithOne(r => r.Restaurant)
                 .HasForeignKey(k => k.RestaurantId);
@@ -47,7 +44,8 @@ namespace App
                 .HasForeignKey(k => k.UserId);
 
                 r.HasOne(s => s.Stars)
-                .WithOne(r => r.Review);
+                .WithMany(r => r.Reviews)
+                .HasForeignKey(k => k.StarsId);
 
             });
 
@@ -59,7 +57,107 @@ namespace App
             });
 
 
+            modelBuilder.Entity<RestaurantCategory>(rc =>
+            {
+                rc.HasKey(k => new { k.RestaurantId, k.CategoryId });
 
+                rc.HasOne(c => c.Category)
+                .WithMany(r => r.RestaurantCategories)
+                .HasForeignKey(k => k.CategoryId);
+
+                rc.HasOne(c => c.Restaurant)
+               .WithMany(r => r.RestaurantCategories)
+               .HasForeignKey(k => k.RestaurantId);
+
+            });
+               
+            modelBuilder.Entity<Category>()
+                .HasData(
+
+                new Category()
+                {
+                    Id = 1,
+                    Name = "FastFood"
+                },
+
+                new Category()
+                {
+                    Id = 2,
+                    Name = "FamilyStyle"
+                },
+
+                 new Category()
+                 {
+                     Id = 3,
+                     Name = "Premium"
+                 },
+
+                  new Category()
+                  {
+                      Id = 4,
+                      Name = "Cafeteria"
+                  },
+
+                   new Category()
+                   {
+                       Id = 5,
+                       Name = "Pub"
+                   },
+
+                    new Category()
+                    {
+                        Id = 6,
+                        Name = "FoodTruck"
+                    },
+
+                     new Category()
+                     {
+                         Id = 7,
+                         Name = "CasualDining"
+                     }
+
+
+                );
+
+
+            modelBuilder.Entity<Stars>()
+                .HasData(
+
+                new Stars()
+                {
+                    Id = 1,
+                    Star = 1,
+                    Rating = "GastroLoser"
+                },
+
+                new Stars()
+                {
+                    Id = 2,
+                    Star = 2,
+                    Rating = "Low"
+                },
+
+                new Stars()
+                {
+                    Id = 3,
+                    Star = 3,
+                    Rating = "Medium"
+                },
+
+                new Stars()
+                {
+                    Id = 4,
+                    Star = 4,
+                    Rating = "High"
+                },
+
+                new Stars()
+                {
+                    Id = 5,
+                    Star = 5,
+                    Rating = "GastroBeast"
+                }
+                );
 
         }
 
