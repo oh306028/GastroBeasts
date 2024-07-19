@@ -47,6 +47,9 @@ namespace App
                 .WithMany(r => r.Reviews)
                 .HasForeignKey(k => k.StarsId);
 
+                r.Property(d => d.PostTime)
+                .HasDefaultValueSql("getutcdate()");
+
             });
 
             modelBuilder.Entity<TopDish>(td =>
@@ -63,11 +66,13 @@ namespace App
 
                 rc.HasOne(c => c.Category)
                 .WithMany(r => r.RestaurantCategories)
-                .HasForeignKey(k => k.CategoryId);
+                .HasForeignKey(k => k.CategoryId)
+                .OnDelete(DeleteBehavior.Restrict);
 
                 rc.HasOne(c => c.Restaurant)
                .WithMany(r => r.RestaurantCategories)
-               .HasForeignKey(k => k.RestaurantId);
+               .HasForeignKey(k => k.RestaurantId)
+               .OnDelete(DeleteBehavior.Restrict);
 
             });
                
