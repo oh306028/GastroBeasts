@@ -19,18 +19,19 @@ namespace App.Controllers
         }
 
         [HttpGet]
-        public ActionResult<IEnumerable<RestaurantDto>> GetRestaurants()
+        public ActionResult<IEnumerable<RestaurantDto>> GetRestaurants([FromQuery]bool includeReviews)  
         {
-            var restaurants = _restaurantService.GetAllRestaurants();
+            var restaurants = _restaurantService.GetAllRestaurants(includeReviews);
 
             return Ok(restaurants);
         }
 
 
+
         [HttpGet("{id}")]
-        public ActionResult<RestaurantDto> GetRestaurantById([FromRoute]int id)
+        public ActionResult<RestaurantDto> GetRestaurantById([FromRoute]int id, [FromQuery] bool includeReviews)    
         {
-            var restaurant = _restaurantService.GetRestaurantById(id);
+            var restaurant = _restaurantService.GetRestaurantById(id, includeReviews);
 
             return Ok(restaurant);
         }
