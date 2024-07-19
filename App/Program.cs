@@ -1,5 +1,12 @@
 
+using App.Handlers;
+using App.Services;
 using Microsoft.EntityFrameworkCore;
+using Serilog;
+using Serilog.Core;
+using Serilog.Events;
+using System.Reflection;
+using System.Text.Json.Serialization;
 
 namespace App
 {
@@ -11,12 +18,26 @@ namespace App
 
             // Add services to the container.
 
+            Log.Logger = new LoggerConfiguration()
+                .WriteTo.File("logs/error-.txt", LogEventLevel.Error, rollingInterval: RollingInterval.Day)
+                .WriteTo.File("logs/all-.txt", rollingInterval: RollingInterval.Day)
+                .CreateLogger();
+
+
             builder.Services.AddControllers();
+
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
-            builder.Services.AddScoped<IApplicationSeeder, ApplicationSeeder>(); 
+            builder.Services.AddScoped<IApplicationSeeder, ApplicationSeeder>();
+            builder.Services.AddScoped<IRestaurantService, RestaurantService>();
+            builder.Services.AddScoped<IAddressService, AddressService>();
+            builder.Services.AddScoped<IReviewService, ReviewService>();
+            builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly());
 
+;
+
+            builder.Services.AddScoped<ExceptionHandlingMiddleware>();
 
             builder.Services.AddDbContext<AppDbContext>(options =>
             {
@@ -41,6 +62,8 @@ namespace App
             }
 
             app.UseHttpsRedirection();
+
+            app.UseMiddleware<ExceptionHandlingMiddleware>();   
 
             app.UseAuthorization();
 
