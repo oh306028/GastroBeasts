@@ -37,7 +37,6 @@ namespace App.Controllers
 
 
         [HttpPost]
-        [Authorize(Roles = "Admin")]
         public ActionResult<int> CreateRestaurant([FromBody] CreateRestaurantDto dto)
         {
             int createdRestaurantId = _restaurantService.CreateRestaurant(dto);
