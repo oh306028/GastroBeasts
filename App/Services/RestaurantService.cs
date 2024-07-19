@@ -1,5 +1,6 @@
 ﻿using App.Dtos.CreateDtos;
 using App.Dtos.DisplayDtos;
+using App.Dtos.QueryParams;
 using App.Entities;
 using App.Exceptions;
 using AutoMapper;
@@ -13,7 +14,7 @@ namespace App.Services
         RestaurantDto GetRestaurantById(int id, bool includeReviews);
         int CreateRestaurant(CreateRestaurantDto dto);
 
-        IEnumerable<RestaurantDto> GetAllRestaurants(bool includeReviews);
+        IEnumerable<RestaurantDto> GetAllRestaurants(RestaurantQuery queryParams);
     }   
 
     public class RestaurantService : IRestaurantService
@@ -38,14 +39,14 @@ namespace App.Services
         }
 
      
-        public IEnumerable<RestaurantDto> GetAllRestaurants(bool includeReviews)
+        public IEnumerable<RestaurantDto> GetAllRestaurants(RestaurantQuery queryParams)    
         {
             IQueryable<Restaurant> query = _dbContext.Restaurants
               .Include(a => a.Address)
               .Include(rc => rc.RestaurantCategories)
               .ThenInclude(c => c.Category);
 
-            if (includeReviews)
+            if (queryParams.IncludeReviews != null && queryParams.IncludeReviews == true)
             {
                 query = query
                     .Include(rv => rv.Reviews)
@@ -54,7 +55,17 @@ namespace App.Services
                         .ThenInclude(u => u.ReviewedBy);
             }
 
+
             var restaurants = query.ToList();
+
+
+                restaurants = restaurants.
+               Where(param =>param.Name.ToLower().
+               Contains(queryParams.RestaurantName.ToLower())
+               || queryParams.RestaurantName == null)
+               .ToList();
+            
+
 
             return _mapper.Map<List<RestaurantDto>>(restaurants);
 
