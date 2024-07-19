@@ -4,14 +4,16 @@ using App.Entities;
 using App.Exceptions;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace App.Services
 {
     public interface IRestaurantService
     {
-        IEnumerable<RestaurantDto> GetAllRestaurants();
-        RestaurantDto GetRestaurantById(int id);
+        RestaurantDto GetRestaurantById(int id, bool includeReviews);
         int CreateRestaurant(CreateRestaurantDto dto);
+
+        IEnumerable<RestaurantDto> GetAllRestaurants(bool includeReviews);
     }   
 
     public class RestaurantService : IRestaurantService
@@ -35,27 +37,47 @@ namespace App.Services
             return createdRestaurant.Id;
         }
 
-        public IEnumerable<RestaurantDto> GetAllRestaurants()
+     
+        public IEnumerable<RestaurantDto> GetAllRestaurants(bool includeReviews)
         {
-            var restaurants = _dbContext.Restaurants
-                .Include(a => a.Address)
-                .Include(rc => rc.RestaurantCategories)
-                .ThenInclude(c => c.Category)
-                .Include(rv => rv.Reviews);
+            IQueryable<Restaurant> query = _dbContext.Restaurants
+              .Include(a => a.Address)
+              .Include(rc => rc.RestaurantCategories)
+              .ThenInclude(c => c.Category);
 
-            return _mapper.Map<List<RestaurantDto>>(restaurants);   
+            if (includeReviews)
+            {
+                query = query
+                    .Include(rv => rv.Reviews)
+                        .ThenInclude(u => u.Stars)
+                    .Include(rv => rv.Reviews)
+                        .ThenInclude(u => u.ReviewedBy);
+            }
+
+            var restaurants = query.ToList();
+
+            return _mapper.Map<List<RestaurantDto>>(restaurants);
+
         }
 
-
-        public RestaurantDto GetRestaurantById(int id)
+        public RestaurantDto GetRestaurantById(int id, bool includeReviews)
         {
-            var restaurant = _dbContext.Restaurants.Include(a => a.Address)
+            IQueryable<Restaurant> query = _dbContext.Restaurants.Include(a => a.Address)
                 .Include(rc => rc.RestaurantCategories)
-                .ThenInclude(c => c.Category)
-                .Include(rv => rv.Reviews)
-                .FirstOrDefault(i => i.Id == id);
+                .ThenInclude(c => c.Category);
 
 
+            if (includeReviews)
+            {
+                query = query.
+                    Include(r => r.Reviews)
+                    .ThenInclude(s => s.Stars)
+                    .Include(r => r.Reviews).
+                    ThenInclude(rb => rb.ReviewedBy);
+            }
+
+            var restaurants = query.ToList();
+            var restaurant = restaurants.FirstOrDefault(i => i.Id == id);
 
             if (restaurant is null)
                 throw new NotFoundException("Restaurant not found");
