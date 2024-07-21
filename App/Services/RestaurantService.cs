@@ -9,6 +9,8 @@ using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace App.Services
 {
+    //TO DO:
+    //filtering by category name
     public interface IRestaurantService
     {
         RestaurantDto GetRestaurantById(int id, bool includeReviews);
@@ -60,12 +62,12 @@ namespace App.Services
 
 
                 restaurants = restaurants.
-               Where(param =>param.Name.ToLower().
-               Contains(queryParams.RestaurantName.ToLower())
-               || queryParams.RestaurantName == null)
+               Where(param => queryParams.RestaurantName == null || param.Name.ToLower().
+               Contains(queryParams.RestaurantName.ToLower()))
                .ToList();
-            
 
+            
+            
 
             return _mapper.Map<List<RestaurantDto>>(restaurants);
 
