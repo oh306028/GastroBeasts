@@ -9,7 +9,13 @@ namespace App
     {
         public AutoMappingProfile() 
         {
+
             CreateMap<CreateRestaurantDto, Restaurant>();
+
+            CreateMap<Category, RestaurantCategoriesDto>(); 
+
+                
+            CreateMap<CreateAddressDto, Address>(); 
 
             CreateMap<Address, AddressDto>();
 
@@ -30,7 +36,8 @@ namespace App
 
             CreateMap<Review, ReviewDto>()
                 .ForMember(dest => dest.Stars, opt => opt.MapFrom(src => src.Stars))
-                .ForMember(dest => dest.ReviewedBy, opt => opt.MapFrom(src => src.ReviewedBy));
+                .ForMember(dest => dest.ReviewedBy, opt => opt.MapFrom(src => src.ReviewedBy))
+                .ForMember(dest => dest.Stars, opt => opt.MapFrom(src => src.Stars));
 
        
 
