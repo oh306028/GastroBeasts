@@ -1,11 +1,13 @@
-﻿using App.Dtos.DisplayDtos;
+﻿using App.Dtos.CreateDtos;
+using App.Dtos.DisplayDtos;
 using App.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace App.Controllers
 {
 
-    [Route("api/restaurants/categories")]
+    [Route("api/restaurants")]
     [ApiController]
     public class CategoryController : ControllerBase
     {
@@ -16,16 +18,47 @@ namespace App.Controllers
            _categoryService = categoryService;
         }
 
-
-
-        [HttpGet]
-        public ActionResult<IEnumerable<RestaurantCategoriesDto>> GetRestaurantCategories()
+        [Authorize(Roles = "Admin")]
+        [HttpPost("categories")]
+        public ActionResult CreateNewCategory([FromBody]CreateNewCategoryDto dto)
         {
-            var categories = _categoryService.GetAllRestaurantCategories();
+            _categoryService.CreateNewCategory(dto);    
+
+            return Created("api/restaurants/categories", null);
+        }
+
+        
+
+        [HttpGet("categories")]
+        public ActionResult<IEnumerable<RestaurantCategoriesDto>> GetCategories()   
+        {
+            var categories = _categoryService.GetAllCategories();   
 
             return Ok(categories);
         }
 
+        //TO DO:
+        //IN SERVICE COMMENTS!
+        //NOT WORKING PROPERLY YET
+
+        [HttpGet("{restaurantId}/categories")]
+        public ActionResult<IEnumerable<RestaurantCategoriesDto>> GetRestaurantCategories([FromRoute] int restaurantId) 
+        {
+            var categories = _categoryService.GetAllRestaurantCategories(restaurantId);
+
+            return Ok(categories);
+        }
+            
+
+
+
+        [HttpPost("{restaurantId}/categories")]
+        public ActionResult CreateCategoryForRestaurant([FromRoute] int restaurantId, [FromBody] CreateNewCategoryDto dto)   
+        {
+            _categoryService.AddCategoryToRestaurant(restaurantId, dto);
+
+            return Created($"api/restaurant/{restaurantId}", null);
+        }
 
     }
 }
