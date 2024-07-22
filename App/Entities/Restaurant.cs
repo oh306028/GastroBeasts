@@ -10,7 +10,7 @@ namespace App.Entities
         [Required, MaxLength(30)]
         public string Name { get; set; }
 
-        [Required, MaxLength(50)]
+        [Required, MaxLength(200)]
         public string Description { get; set; } 
 
 

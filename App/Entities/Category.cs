@@ -12,7 +12,6 @@ namespace App.Entities
 
         public virtual List<RestaurantCategory> RestaurantCategories { get; set; } = new List<RestaurantCategory>();
 
-
         public virtual List<TopDish> TopDish { get; set; } = new List<TopDish>();
     }
 }
