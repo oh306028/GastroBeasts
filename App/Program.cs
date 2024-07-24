@@ -33,9 +33,9 @@ namespace App
             builder.Services.AddScoped<IRestaurantService, RestaurantService>();
             builder.Services.AddScoped<IAddressService, AddressService>();
             builder.Services.AddScoped<IReviewService, ReviewService>();
+            builder.Services.AddScoped<ICategoryService, CategoryService>();
             builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly());
 
-;
 
             builder.Services.AddScoped<ExceptionHandlingMiddleware>();
 
