@@ -39,8 +39,11 @@ namespace App
             builder.Services.AddScoped<IReviewService, ReviewService>();
             builder.Services.AddScoped<IUserService, UserService>();    
             builder.Services.AddScoped<ICategoryService, CategoryService>();
+            builder.Services.AddScoped<IUserContextService, UserContextService>();  
             builder.Services.AddScoped<IValidator<RegisterUserDto>, RegisterUserDtoValidator>();    
             builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly());
+
+            builder.Services.AddHttpContextAccessor();
 
 
             builder.Services.AddScoped<ExceptionHandlingMiddleware>();
@@ -72,7 +75,7 @@ namespace App
             app.UseMiddleware<ExceptionHandlingMiddleware>();   
 
             app.UseAuthorization();
-
+            app.UseAuthentication();
 
             app.MapControllers();
 
