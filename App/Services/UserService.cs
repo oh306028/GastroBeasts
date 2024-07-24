@@ -1,6 +1,7 @@
 ﻿using App.Dtos.CreateDtos;
 using App.Entities;
 using AutoMapper;
+using Microsoft.AspNetCore.Identity;
 
 namespace App.Services
 {
@@ -21,18 +22,17 @@ namespace App.Services
             _mapper = mapper;
         }
 
-        //TO DO:
-        //create validator to check if the passed email is already used
-        //FluentValidation**
 
         public void RegisterNewUser(RegisterUserDto dto)
         {
+            var hasher = new PasswordHasher<User>();
 
-            var mapperUser =_mapper.Map<User>(dto);
 
-            //validate
+            var mappedUser = _mapper.Map<User>(dto);
+            mappedUser.PasswordHash = hasher.HashPassword(mappedUser, dto.Password);
 
-            _dbContext.Users.Add(mapperUser);
+
+            _dbContext.Users.Add(mappedUser);
             _dbContext.SaveChanges();
             
         }
