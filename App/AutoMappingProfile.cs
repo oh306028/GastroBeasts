@@ -10,10 +10,13 @@ namespace App
         public AutoMappingProfile() 
         {
 
+            CreateMap<CreateNewCategoryDto, Category>();
+
             CreateMap<CreateRestaurantDto, Restaurant>();
 
-            CreateMap<Category, RestaurantCategoriesDto>(); 
+            CreateMap<Category, RestaurantCategoriesDto>();
 
+            CreateMap<RegisterUserDto, User>();
                 
             CreateMap<CreateAddressDto, Address>(); 
 
