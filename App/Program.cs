@@ -1,6 +1,10 @@
 
+using App.Dtos.CreateDtos;
 using App.Handlers;
 using App.Services;
+using App.Validators;
+using FluentValidation;
+using FluentValidation.AspNetCore;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using Serilog.Core;
@@ -24,7 +28,7 @@ namespace App
                 .CreateLogger();
 
 
-            builder.Services.AddControllers();
+            builder.Services.AddControllers().AddFluentValidation();
 
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
@@ -35,6 +39,7 @@ namespace App
             builder.Services.AddScoped<IReviewService, ReviewService>();
             builder.Services.AddScoped<IUserService, UserService>();    
             builder.Services.AddScoped<ICategoryService, CategoryService>();
+            builder.Services.AddScoped<IValidator<RegisterUserDto>, RegisterUserDtoValidator>();    
             builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly());
 
 
