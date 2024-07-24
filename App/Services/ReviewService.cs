@@ -17,11 +17,13 @@ namespace App.Services
     {
         private readonly AppDbContext _dbContext;
         private readonly IMapper _mapper;
+        private readonly IUserContextService _userContextService;
 
-        public ReviewService(AppDbContext dbContext, IMapper mapper)
+        public ReviewService(AppDbContext dbContext, IMapper mapper, IUserContextService userContextService)
         {
             _dbContext = dbContext;
-            _mapper = mapper;    
+            _mapper = mapper;
+            _userContextService = userContextService;   
         }
 
         private Restaurant CheckRestaurant(int restaurantId)
@@ -38,17 +40,15 @@ namespace App.Services
         {
             var restaurant = CheckRestaurant(restaurantId);
 
-  
             var createdReview = new Review()
             {
                 Comment = dto.Comment,
                 StarsId = dto.Stars,
                 Restaurant = restaurant,
-                UserId = 1
-                
-            };
+                UserId = (int)_userContextService.UserId
 
-            
+            };
+          
             _dbContext.Reviews.Add(createdReview);
             _dbContext.SaveChanges();
 
