@@ -14,7 +14,7 @@ namespace App.Entities
         public string Email { get; set; }
 
 
-
+        [Required]
         public string PasswordHash { get; set; }
 
 
