@@ -5,11 +5,14 @@ using App.Services;
 using App.Validators;
 using FluentValidation;
 using FluentValidation.AspNetCore;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Serilog;
 using Serilog.Core;
 using Serilog.Events;
 using System.Reflection;
+using System.Text;
 using System.Text.Json.Serialization;
 
 namespace App
@@ -28,7 +31,7 @@ namespace App
                 .CreateLogger();
 
 
-            builder.Services.AddControllers().AddFluentValidation();
+            builder.Services.AddControllers();
 
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
@@ -41,10 +44,11 @@ namespace App
             builder.Services.AddScoped<ICategoryService, CategoryService>();
             builder.Services.AddScoped<IUserContextService, UserContextService>();  
             builder.Services.AddScoped<IValidator<RegisterUserDto>, RegisterUserDtoValidator>();    
+            builder.Services.AddScoped<IValidator<LoginUserDto>, LoginUserDtoValidator>();    
             builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly());
-
+                
             builder.Services.AddHttpContextAccessor();
-
+            builder.Services.AddFluentValidationAutoValidation().AddFluentValidationClientsideAdapters();
 
             builder.Services.AddScoped<ExceptionHandlingMiddleware>();
 
@@ -53,6 +57,37 @@ namespace App
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
             });
 
+
+            var jwtOptionSection = builder.Configuration.GetRequiredSection("Jwt");
+            builder.Services.Configure<JwtOptions>(jwtOptionSection);
+
+
+            var jwtOptions = new JwtOptions();
+            jwtOptionSection.Bind(jwtOptions);
+            builder.Services.AddSingleton(jwtOptions);
+
+
+            builder.Services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+
+            }).AddJwtBearer(jwtOptions =>
+            {
+                var configKey = jwtOptionSection["Key"];
+                var key = Encoding.UTF8.GetBytes(configKey);
+
+                             
+
+                jwtOptions.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidIssuer = jwtOptionSection["Issuer"],
+                    ValidAudience = jwtOptionSection["Audience"],
+                    IssuerSigningKey = new SymmetricSecurityKey(key),
+                   
+                };
+            });
 
             var app = builder.Build();
             var scope = app.Services.CreateScope();
@@ -63,19 +98,21 @@ namespace App
 
 
 
+
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
+            app.UseAuthentication();
 
             app.UseHttpsRedirection();
 
             app.UseMiddleware<ExceptionHandlingMiddleware>();   
 
             app.UseAuthorization();
-            app.UseAuthentication();
+         
 
             app.MapControllers();
 
