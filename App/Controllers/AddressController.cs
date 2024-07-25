@@ -31,6 +31,7 @@ namespace App.Controllers
 
 
         [HttpPost]
+        [Authorize]
         public ActionResult<int> CreateAddress([FromRoute] int restaurantId, [FromBody] CreateAddressDto dto)
         {
             int addressId = _addressService.CreateAddressToRestaurant(restaurantId, dto);

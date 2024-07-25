@@ -53,6 +53,7 @@ namespace App.Controllers
 
 
         [HttpPost("{restaurantId}/categories")]
+        [Authorize]
         public ActionResult CreateCategoryForRestaurant([FromRoute] int restaurantId, [FromBody] CreateNewCategoryDto dto)   
         {
             _categoryService.AddCategoryToRestaurant(restaurantId, dto);

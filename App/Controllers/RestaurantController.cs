@@ -1,5 +1,6 @@
 ﻿using App.Dtos.CreateDtos;
 using App.Dtos.DisplayDtos;
+using App.Dtos.QueryParams;
 using App.Entities;
 using App.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -19,9 +20,9 @@ namespace App.Controllers
         }
 
         [HttpGet]
-        public ActionResult<IEnumerable<RestaurantDto>> GetRestaurants([FromQuery]bool includeReviews)  
+        public ActionResult<IEnumerable<RestaurantDto>> GetRestaurants([FromQuery]RestaurantQuery queryParams)  
         {
-            var restaurants = _restaurantService.GetAllRestaurants(includeReviews);
+            var restaurants = _restaurantService.GetAllRestaurants(queryParams);
 
             return Ok(restaurants);
         }
@@ -38,6 +39,7 @@ namespace App.Controllers
 
 
         [HttpPost]
+        [Authorize]
         public ActionResult<int> CreateRestaurant([FromBody] CreateRestaurantDto dto)
         {
             int createdRestaurantId = _restaurantService.CreateRestaurant(dto);
