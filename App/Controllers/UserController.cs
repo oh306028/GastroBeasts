@@ -25,7 +25,13 @@ namespace App.Controllers
         }
 
 
+        [HttpPost("login")]
+        public ActionResult Login([FromBody]LoginUserDto dto)   
+        {
+            var authenticationToken = _userService.Login(dto);
 
+            return Ok(authenticationToken);
+        }
 
 
 
