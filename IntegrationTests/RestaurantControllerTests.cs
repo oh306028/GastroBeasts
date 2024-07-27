@@ -29,6 +29,17 @@ namespace IntegrationTests
                         o.DefaultChallengeScheme = "TestScheme";
                     }).AddScheme<AuthenticationSchemeOptions, TestAuthenticationHandler>(
                             "TestScheme", options => { });
+
+                    var dbContextDescriptor = services.SingleOrDefault(
+                    d => d.ServiceType ==
+                        typeof(DbContextOptions<AppDbContext>));
+
+                    services.Remove(dbContextDescriptor);
+
+
+                    services.AddDbContext<AppDbContext>(options =>
+                     options.UseInMemoryDatabase("TestDb"));
+
                 });
             })
        .CreateClient();
@@ -49,8 +60,7 @@ namespace IntegrationTests
                 Description = "Test descr"
             };
 
-            
-               
+                       
             var response = await _client.PostAsJsonAsync("/api/restaurants", restaurantModel);
 
             response.StatusCode.Should().Be(System.Net.HttpStatusCode.Created);
@@ -69,6 +79,9 @@ namespace IntegrationTests
             response.StatusCode.Should().Be(System.Net.HttpStatusCode.OK); 
 
         }
+
+
+
 
 
         [Theory]
