@@ -21,9 +21,21 @@ namespace App.Handlers
                 Log.Error(notFound.Message);
 
                 context.Response.StatusCode = 404;
-               await context.Response.WriteAsync(notFound.Message);
+                await context.Response.WriteAsync(notFound.Message);
             }
-            catch(Exception ex)
+            catch (ExistingResourceException existEx)
+            {
+                Log.Error(existEx.Message);
+
+                context.Response.StatusCode = 409;
+                await context.Response.WriteAsync(existEx.Message);
+            }
+            catch(ForbidException forbidEx)
+            {
+                context.Response.StatusCode = 403;
+                await context.Response.WriteAsync(forbidEx.Message);
+            }
+            catch (Exception ex)
             {
                 Log.Error(ex.Message);
 
