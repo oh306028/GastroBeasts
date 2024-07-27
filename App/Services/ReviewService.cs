@@ -85,7 +85,14 @@ namespace App.Services
 
 
             reviewToUpdate.Comment = dto.Comment is null ? reviewToUpdate.Comment : dto.Comment;
-            reviewToUpdate.Stars.Star = dto.Stars is null ? reviewToUpdate.Stars.Star : (int)dto.Stars;
+
+
+            if (dto.Stars != null)
+            {
+                var newStars = _dbContext.Stars.FirstOrDefault(i => i.Id == dto.Stars);
+
+                reviewToUpdate.Stars = newStars;
+            }
 
 
             _dbContext.SaveChanges();
