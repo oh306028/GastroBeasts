@@ -1,8 +1,11 @@
-﻿using App.Dtos.CreateDtos;
+﻿using App.Authorization;
+using App.Dtos.CreateDtos;
 using App.Dtos.DisplayDtos;
+using App.Dtos.UpdateDtos;
 using App.Entities;
 using App.Exceptions;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 
 namespace App.Services
@@ -11,6 +14,8 @@ namespace App.Services
     {
         int CreateReviewToRestaurant(CreateReviewDto dto, int restaurantId);
         IEnumerable<ReviewDto> GetAllReviewsFromRestaurant(int restaurantId);
+        void DeleteReview(int restaurantId, int reviewId);
+        void UpdateReview(int restaurantId, int reviewId, UpdateReviewDto dto);
     }
 
     public class ReviewService : IReviewService
@@ -18,13 +23,75 @@ namespace App.Services
         private readonly AppDbContext _dbContext;
         private readonly IMapper _mapper;
         private readonly IUserContextService _userContextService;
+        private readonly IAuthorizationService _authorizationHandler;
 
-        public ReviewService(AppDbContext dbContext, IMapper mapper, IUserContextService userContextService)
+        public ReviewService(AppDbContext dbContext, IMapper mapper, IUserContextService userContextService, IAuthorizationService authorizationHandler)
         {
             _dbContext = dbContext;
             _mapper = mapper;
-            _userContextService = userContextService;   
+            _userContextService = userContextService;
+            _authorizationHandler = authorizationHandler;
         }
+
+
+        public void DeleteReview(int restaurantId, int reviewId)
+        {
+            
+            var reviewToDelete = _dbContext.Reviews.Include(u => u.ReviewedBy).FirstOrDefault(r => r.Id == reviewId);
+
+            var restaurant = CheckRestaurant(restaurantId);
+
+            if (reviewToDelete is null)
+                throw new NotFoundException("Review not found");
+
+
+            var authorizartionResult = _authorizationHandler
+                .AuthorizeAsync(_userContextService.User, reviewToDelete,
+                new ResourceOperationRequirement(OperationType.Delete)).Result;
+
+
+            if (!authorizartionResult.Succeeded)
+                throw new ForbidException("Cannot delete not yours reviews");
+
+
+            _dbContext.Reviews.Remove(reviewToDelete);
+            _dbContext.SaveChanges();
+
+
+        }
+
+        //TO DO
+        //WRITE TRIGGER WHENEVER STAR IS UPDATING SHOULD UPDATE RATING
+        public void UpdateReview(int restaurantId, int reviewId, UpdateReviewDto dto)
+        {
+            var reviewToUpdate = _dbContext.Reviews
+                .Include(u => u.ReviewedBy)
+                .Include(s => s.Stars)
+                .FirstOrDefault(r => r.Id == reviewId);
+                
+            var restaurant = CheckRestaurant(restaurantId);
+
+            if (reviewToUpdate is null)
+                throw new NotFoundException("Review not found");
+
+
+            var authorizartionResult = _authorizationHandler
+                .AuthorizeAsync(_userContextService.User, reviewToUpdate,
+                new ResourceOperationRequirement(OperationType.Update)).Result;
+
+
+            if (!authorizartionResult.Succeeded)
+                throw new ForbidException("Cannot update not yours reviews");
+
+
+            reviewToUpdate.Comment = dto.Comment is null ? reviewToUpdate.Comment : dto.Comment;
+            reviewToUpdate.Stars.Star = dto.Stars is null ? reviewToUpdate.Stars.Star : (int)dto.Stars;
+
+
+            _dbContext.SaveChanges();
+
+        }
+
 
         private Restaurant CheckRestaurant(int restaurantId)
         {
@@ -35,6 +102,8 @@ namespace App.Services
 
             return restaurant;
         }
+
+
 
         public int CreateReviewToRestaurant(CreateReviewDto dto, int restaurantId)
         {

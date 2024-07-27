@@ -1,5 +1,6 @@
 ﻿using App.Dtos.CreateDtos;
 using App.Dtos.DisplayDtos;
+using App.Dtos.UpdateDtos;
 using App.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -37,6 +38,28 @@ namespace App.Controllers
 
             return Ok(reviews);
         }
+
+
+        [HttpDelete("{reviewId}/delete")]
+        [Authorize]
+        public ActionResult DeleteReview([FromRoute] int restaurantId, [FromRoute] int reviewId)
+        {
+            _reviewService.DeleteReview(restaurantId, reviewId);
+
+            return NoContent();
+        }
+
+
+
+
+        [HttpPut("{reviewId}/update")]
+        public ActionResult UpdateReview([FromRoute] int restaurantId, [FromRoute] int reviewId, UpdateReviewDto dto)
+        {
+            _reviewService.UpdateReview(restaurantId, reviewId, dto);
+
+            return NoContent();
+        }
+
 
     }
 }
