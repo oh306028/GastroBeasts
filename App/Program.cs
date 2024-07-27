@@ -1,4 +1,5 @@
 
+using App.Authorization;
 using App.Dtos.CreateDtos;
 using App.Handlers;
 using App.Services;
@@ -6,6 +7,7 @@ using App.Validators;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
@@ -46,6 +48,8 @@ namespace App
             builder.Services.AddScoped<IValidator<RegisterUserDto>, RegisterUserDtoValidator>();    
             builder.Services.AddScoped<IValidator<LoginUserDto>, LoginUserDtoValidator>();    
             builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly());
+
+            builder.Services.AddScoped<IAuthorizationHandler, ResourceOperationRequirementHandler>();
                 
             builder.Services.AddHttpContextAccessor();
             builder.Services.AddFluentValidationAutoValidation().AddFluentValidationClientsideAdapters();
