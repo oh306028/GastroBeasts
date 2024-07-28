@@ -60,8 +60,6 @@ namespace App.Services
 
         }
 
-        //TO DO
-        //WRITE TRIGGER WHENEVER STAR IS UPDATING SHOULD UPDATE RATING
         public void UpdateReview(int restaurantId, int reviewId, UpdateReviewDto dto)
         {
             var reviewToUpdate = _dbContext.Reviews
