@@ -13,7 +13,7 @@ namespace IntegrationTests
 
         protected override Task<AuthenticateResult> HandleAuthenticateAsync()
         {
-            var claims = new[] { new Claim(ClaimTypes.Name, "Test user") };
+            var claims = new[] { new Claim(ClaimTypes.Name, "Test user"), new Claim(ClaimTypes.NameIdentifier, "1") };
             var identity = new ClaimsIdentity(claims, "TestScheme");
             var principal = new ClaimsPrincipal(identity);
             var ticket = new AuthenticationTicket(principal, "TestScheme");

@@ -101,5 +101,47 @@ namespace IntegrationTests
 
         }
 
+        [Fact]
+
+        public async Task DeleteReview_WithValidRequest_ReturnsNoconent()
+        {
+            //arrange
+            var factoryService = _factory.Services.GetService<IServiceScopeFactory>();
+            using var scope = factoryService.CreateScope();
+            var _dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+            SeedDbWithRestaurant(_dbContext);
+
+            var restaurantToAddReview = _dbContext.Restaurants.FirstOrDefault(i => i.Name == "Test");
+
+            var review = new Review()
+            {
+                Comment = "Test comment",
+                StarsId = 3,
+                UserId = 1,
+                Restaurant = restaurantToAddReview
+
+            };
+
+            _dbContext.Reviews.Add(review);
+            _dbContext.SaveChanges();
+
+
+            //act
+            var reviewToDel = _dbContext.Reviews.FirstOrDefault(n => n.Comment == "Test comment");
+            var response = await _client.DeleteAsync($"/api/restaurants/{restaurantToAddReview.Id}/reviews/{reviewToDel.Id}/delete");
+
+                
+                
+            //assert
+            response.StatusCode.Should().Be(System.Net.HttpStatusCode.NoContent);
+
+
+            _dbContext.Remove(restaurantToAddReview);
+
+            _dbContext.SaveChanges();
+
+        }
+
     }
 }
