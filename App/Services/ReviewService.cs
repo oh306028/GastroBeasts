@@ -134,6 +134,7 @@ namespace App.Services
         public IEnumerable<ReviewDto> GetAllReviewsFromRestaurant(int restaurantId)
         {
             var restaurant = _dbContext.Restaurants
+                .AsNoTracking()
                 .Include(r => r.Reviews)
                 .ThenInclude(s => s.Stars)
                 .Include(r => r.Reviews)
