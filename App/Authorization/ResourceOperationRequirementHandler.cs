@@ -4,9 +4,9 @@ using System.Security.Claims;
 
 namespace App.Authorization
 {
-    public class ResourceOperationRequirementHandler : AuthorizationHandler<ResourceOperationRequirement, Review>
+    public class ResourceOperationRequirementHandler : AuthorizationHandler<ResourceOperationRequirement, object>   
     {
-        protected override Task HandleRequirementAsync(AuthorizationHandlerContext context, ResourceOperationRequirement requirement, Review review)        
+        protected override Task HandleRequirementAsync(AuthorizationHandlerContext context, ResourceOperationRequirement requirement, object resource)          
         {
 
             if(requirement.OperationType == OperationType.Read || requirement.OperationType == OperationType.Create)
@@ -19,9 +19,23 @@ namespace App.Authorization
             {
                 var userId = int.Parse(context.User.FindFirst(c => c.Type == ClaimTypes.NameIdentifier).Value);
 
-                if(userId == review.ReviewedBy.Id)
+
+                if(resource is Review review)
                 {
-                    context.Succeed(requirement);
+                    if (userId == review.ReviewedBy.Id)
+                    {
+                        context.Succeed(requirement);
+                    }
+
+                }
+
+                if (resource is Restaurant restaurant)
+                {
+                    if (userId == restaurant.UserId)
+                    {
+                        context.Succeed(requirement);
+                    }
+
                 }
 
             }
