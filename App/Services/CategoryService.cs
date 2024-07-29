@@ -37,6 +37,8 @@ namespace App.Services
             return mappedCategories;
         }
 
+
+
         //TO DO:
         //query below takes only the last ids
         //refactor it to take all the categories
@@ -47,22 +49,21 @@ namespace App.Services
             if(restaurant is null)
                 throw new NotFoundException("Restaurant not found");
 
-            var currentRestaurantcategories = _dbContext.RestaurantCategories.Where(r => r.RestaurantId == restaurantId).ToList();
+            var currentRestaurantcategories = _dbContext.RestaurantCategories
+                .AsNoTracking()
+                .Include(c => c.Category)
+                .Where(r => r.RestaurantId == restaurantId)
+                .ToList();
 
-            var currentRestaurantCategoryIds = new List<int>();
-
-            IQueryable<Category> query = null;
-
-            foreach(var restaurantCat in currentRestaurantcategories)
-            {
-                query = _dbContext.Categories.TakeWhile(x => x.Id == restaurantCat.CategoryId);             
-            }
+            var categoryIds = currentRestaurantcategories
+                .Select(c => c.Category);
            
-
-            var mappedCategories = _mapper.Map<List<RestaurantCategoriesDto>>(query.ToList());
+            var mappedCategories = _mapper.Map<List<RestaurantCategoriesDto>>(categoryIds);
 
             return mappedCategories;
         }
+
+
 
 
 
