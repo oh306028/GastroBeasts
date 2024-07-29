@@ -1,9 +1,12 @@
-﻿using App.Dtos.CreateDtos;
+﻿using App.Authorization;
+using App.Dtos.CreateDtos;
 using App.Dtos.DisplayDtos;
 using App.Dtos.QueryParams;
+using App.Dtos.UpdateDtos;
 using App.Entities;
 using App.Exceptions;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
@@ -15,6 +18,8 @@ namespace App.Services
     {
         RestaurantDto GetRestaurantById(int id, bool includeReviews);
         int CreateRestaurant(CreateRestaurantDto dto);
+        void DeleteRestaurant(int restaurantId);
+        void UpdateRestaurant(int restaurantId, UpdateRestaurantDto dto);
 
         IEnumerable<RestaurantDto> GetAllRestaurants(RestaurantQuery queryParams);
     }   
@@ -23,16 +28,23 @@ namespace App.Services
     {
         private readonly AppDbContext _dbContext;
         private readonly IMapper _mapper;
+        private readonly IAuthorizationService _authorizationService;
+        private readonly IUserContextService _userContextService;
 
-        public RestaurantService(AppDbContext dbContext, IMapper mapper)    
+        public RestaurantService(AppDbContext dbContext, IMapper mapper, IAuthorizationService authorizationService, IUserContextService userContextService)    
         {
             _dbContext = dbContext;
-            _mapper = mapper;
+            _mapper = mapper;   
+            _authorizationService = authorizationService;
+            _userContextService = userContextService;
         }
 
         public int CreateRestaurant(CreateRestaurantDto dto)
         {
             var createdRestaurant = _mapper.Map<Restaurant>(dto);
+
+
+            createdRestaurant.UserId = (int)_userContextService.UserId;
 
             _dbContext.Restaurants.Add(createdRestaurant);
             _dbContext.SaveChanges();
@@ -40,10 +52,55 @@ namespace App.Services
             return createdRestaurant.Id;
         }
 
-     
+
+        public void DeleteRestaurant(int restaurantId)
+        {
+            var restaurantToDelete = _dbContext.Restaurants.FirstOrDefault(i => i.Id == restaurantId);
+
+            if (restaurantToDelete is null)
+                throw new NotFoundException("Restaurant not found");
+
+
+            var authorizartionResult =  _authorizationService  
+                   .AuthorizeAsync(_userContextService.User, restaurantToDelete, new ResourceOperationRequirement(OperationType.Delete)).Result;
+
+
+            if (!authorizartionResult.Succeeded)
+                throw new ForbidException("Cannot delete not yours restaurants");
+
+            _dbContext.Remove(restaurantToDelete);
+            _dbContext.SaveChanges();
+
+        }
+
+        public void UpdateRestaurant(int restaurantId, UpdateRestaurantDto dto)
+        {
+            var restaurantToUpdate = _dbContext.Restaurants.FirstOrDefault(i => i.Id == restaurantId);
+
+            if (restaurantToUpdate is null)
+                throw new NotFoundException("Restaurant not found");
+
+            var authenticationResult = _authorizationService
+                .AuthorizeAsync(_userContextService.User, restaurantToUpdate, 
+                new ResourceOperationRequirement(OperationType.Update)).Result;
+
+
+            if (!authenticationResult.Succeeded)
+                throw new ForbidException("Cannot update not yours restaurants");
+
+
+            restaurantToUpdate.Name = dto.Name is null ? restaurantToUpdate.Name : dto.Name;
+            restaurantToUpdate.Description = dto.Description is null ? restaurantToUpdate.Description : dto.Description;
+                
+            _dbContext.SaveChanges();
+
+        }
+
+
         public IEnumerable<RestaurantDto> GetAllRestaurants(RestaurantQuery queryParams)    
         {
             IQueryable<Restaurant> query = _dbContext.Restaurants
+                .AsNoTracking()
               .Include(a => a.Address)
               .Include(rc => rc.RestaurantCategories)
               .ThenInclude(c => c.Category);
@@ -75,7 +132,10 @@ namespace App.Services
 
         public RestaurantDto GetRestaurantById(int id, bool includeReviews)
         {
-            IQueryable<Restaurant> query = _dbContext.Restaurants.Include(a => a.Address)
+            IQueryable<Restaurant> query = _dbContext
+                .Restaurants
+                .AsNoTracking()
+                .Include(a => a.Address)
                 .Include(rc => rc.RestaurantCategories)
                 .ThenInclude(c => c.Category);
 
