@@ -1,6 +1,8 @@
 ﻿using App.Dtos.CreateDtos;
 using App.Dtos.DisplayDtos;
 using App.Dtos.QueryParams;
+using App.Dtos.Results;
+using App.Dtos.UpdateDtos;
 using App.Entities;
 using App.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -20,7 +22,7 @@ namespace App.Controllers
         }
 
         [HttpGet]
-        public ActionResult<IEnumerable<RestaurantDto>> GetRestaurants([FromQuery]RestaurantQuery queryParams)  
+        public ActionResult<PagedResults<RestaurantDto>> GetRestaurants([FromQuery]RestaurantQuery queryParams)  
         {
             var restaurants = _restaurantService.GetAllRestaurants(queryParams);
 
@@ -47,6 +49,28 @@ namespace App.Controllers
             return Created($"api/restaurants/{createdRestaurantId}", null);
 
         }
+
+
+        [HttpDelete("{restaurantId}/delete")]       
+        [Authorize]
+        public ActionResult DeleteRestaurant([FromRoute]int restaurantId)
+        {
+            _restaurantService.DeleteRestaurant(restaurantId);
+
+            return NoContent();
+        }
+
+
+
+        [HttpPut("{restaurantId}/update")]
+        [Authorize]
+        public ActionResult DeleteRestaurant([FromRoute] int restaurantId, [FromBody] UpdateRestaurantDto dto)
+        {
+            _restaurantService.UpdateRestaurant(restaurantId, dto);
+
+            return NoContent();
+        }
+
 
 
     }
