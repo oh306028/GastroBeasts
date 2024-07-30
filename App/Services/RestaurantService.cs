@@ -2,18 +2,21 @@
 using App.Dtos.CreateDtos;
 using App.Dtos.DisplayDtos;
 using App.Dtos.QueryParams;
+using App.Dtos.Results;
 using App.Dtos.UpdateDtos;
 using App.Entities;
 using App.Exceptions;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
+using System.Linq;
+using System.Security.Cryptography;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace App.Services
 {
-    //TO DO:
-    //filtering by category name
+
     public interface IRestaurantService
     {
         RestaurantDto GetRestaurantById(int id, bool includeReviews);
@@ -21,7 +24,7 @@ namespace App.Services
         void DeleteRestaurant(int restaurantId);
         void UpdateRestaurant(int restaurantId, UpdateRestaurantDto dto);
 
-        IEnumerable<RestaurantDto> GetAllRestaurants(RestaurantQuery queryParams);
+        PagedResults<RestaurantDto> GetAllRestaurants(RestaurantQuery queryParams);
     }   
 
     public class RestaurantService : IRestaurantService
@@ -91,14 +94,12 @@ namespace App.Services
 
             restaurantToUpdate.Name = dto.Name is null ? restaurantToUpdate.Name : dto.Name;
             restaurantToUpdate.Description = dto.Description is null ? restaurantToUpdate.Description : dto.Description;
-                
             _dbContext.SaveChanges();
-
         }
 
-
-        public IEnumerable<RestaurantDto> GetAllRestaurants(RestaurantQuery queryParams)    
+        public PagedResults<RestaurantDto> GetAllRestaurants(RestaurantQuery queryParams)    
         {
+            
             IQueryable<Restaurant> query = _dbContext.Restaurants
                 .AsNoTracking()
               .Include(a => a.Address)
@@ -115,18 +116,26 @@ namespace App.Services
             }
 
 
-            var restaurants = query.ToList();
+               var restaurants = query.ToList();
 
 
-                restaurants = restaurants.
-               Where(param => queryParams.RestaurantName == null || param.Name.ToLower().
-               Contains(queryParams.RestaurantName.ToLower()))
-               .ToList();
+            restaurants = restaurants
+              .Where(rst =>
+                  (queryParams.RestaurantName == null || rst.Name.ToLower().Contains(queryParams.RestaurantName.ToLower())) &&
+                  (queryParams.CategoryName == null || rst.RestaurantCategories.Any(c => c.Category.Name.ToLower().Contains(queryParams.CategoryName.ToLower()))
+              ))
+              .Skip(queryParams.PageSize * (queryParams.PageNumber - 1))
+              .Take(queryParams.PageSize)
+              .ToList();
 
-            
-            
 
-            return _mapper.Map<List<RestaurantDto>>(restaurants);
+             var mappedRestaurants = _mapper.Map<List<RestaurantDto>>(restaurants);
+
+
+            var result = new PagedResults<RestaurantDto>(mappedRestaurants, queryParams.PageSize,
+                        queryParams.PageNumber, query.Count());  
+
+            return result;
 
         }
 
