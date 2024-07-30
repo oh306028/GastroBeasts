@@ -1,6 +1,7 @@
 
 using App.Authorization;
 using App.Dtos.CreateDtos;
+using App.Dtos.QueryParams;
 using App.Handlers;
 using App.Services;
 using App.Validators;
@@ -15,7 +16,7 @@ using Serilog.Core;
 using Serilog.Events;
 using System.Reflection;
 using System.Text;
-using System.Text.Json.Serialization;
+
 
 namespace App
 {
@@ -47,6 +48,7 @@ namespace App
             builder.Services.AddScoped<IUserContextService, UserContextService>();  
             builder.Services.AddScoped<IValidator<RegisterUserDto>, RegisterUserDtoValidator>();    
             builder.Services.AddScoped<IValidator<LoginUserDto>, LoginUserDtoValidator>();    
+            builder.Services.AddScoped<IValidator<RestaurantQuery>, RestaurantQueryParamsValidator>();      
             builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly());
 
             builder.Services.AddScoped<IAuthorizationHandler, ResourceOperationRequirementHandler>();
