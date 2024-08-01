@@ -30,6 +30,14 @@ namespace App.Controllers
         }
 
 
+        [HttpGet("all")]
+        public ActionResult<IEnumerable<RestaurantDto>> GetAllRestaurants()
+        {
+            var restaurants = _restaurantService.GetRestaurantsNoPagination();
+
+            return Ok(restaurants);
+        }
+
 
         [HttpGet("{id}")]
         public ActionResult<RestaurantDto> GetRestaurantById([FromRoute]int id, [FromQuery] bool includeReviews)    
@@ -51,7 +59,7 @@ namespace App.Controllers
         }
 
 
-        [HttpDelete("{restaurantId}/delete")]       
+        [HttpDelete("{restaurantId}")]       
         [Authorize]
         public ActionResult DeleteRestaurant([FromRoute]int restaurantId)
         {
@@ -62,9 +70,9 @@ namespace App.Controllers
 
 
 
-        [HttpPut("{restaurantId}/update")]
+        [HttpPut("{restaurantId}")] 
         [Authorize]
-        public ActionResult DeleteRestaurant([FromRoute] int restaurantId, [FromBody] UpdateRestaurantDto dto)
+        public ActionResult UpdateRestaurant([FromRoute] int restaurantId, [FromBody] UpdateRestaurantDto dto)
         {
             _restaurantService.UpdateRestaurant(restaurantId, dto);
 

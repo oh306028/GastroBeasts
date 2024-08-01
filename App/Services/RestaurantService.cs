@@ -24,6 +24,8 @@ namespace App.Services
         void DeleteRestaurant(int restaurantId);
         void UpdateRestaurant(int restaurantId, UpdateRestaurantDto dto);
 
+        IEnumerable<RestaurantDto> GetRestaurantsNoPagination();
+
         PagedResults<RestaurantDto> GetAllRestaurants(RestaurantQuery queryParams);
     }   
 
@@ -96,6 +98,26 @@ namespace App.Services
             restaurantToUpdate.Description = dto.Description is null ? restaurantToUpdate.Description : dto.Description;
             _dbContext.SaveChanges();
         }
+        
+
+        public IEnumerable<RestaurantDto> GetRestaurantsNoPagination()
+        {
+            var query = _dbContext.Restaurants
+                .AsNoTracking()
+              .Include(a => a.Address)
+              .Include(rc => rc.RestaurantCategories)
+              .ThenInclude(c => c.Category)
+               .Include(rv => rv.Reviews)
+                        .ThenInclude(u => u.Stars)
+                    .Include(rv => rv.Reviews)
+                        .ThenInclude(u => u.ReviewedBy);
+
+
+            var mappedRestaurants = _mapper.Map<List<RestaurantDto>>(query.ToList());
+
+            return mappedRestaurants;
+        }
+
 
         public PagedResults<RestaurantDto> GetAllRestaurants(RestaurantQuery queryParams)    
         {
