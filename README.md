@@ -103,7 +103,9 @@ The API returns standard HTTP status codes to indicate the success or failure of
 
 ## Testing
 
-For testing purposes, consider using tools such as Postman to send requests to the API endpoints and verify responses. Automated tests can also be set up using your preferred testing framework.
+For testing purposes, typically used postman to send http requests.
+Also project cover the integration tests. Mainly tested the requires for dtos, database requests and properly working services.
+Feel free to check the testing solution.
 
 ## Contributing
 
