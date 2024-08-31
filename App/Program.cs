@@ -95,9 +95,21 @@ namespace App
                 };
             });
 
+
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("FrontEndClient", builder =>
+                        builder.AllowAnyHeader()
+                        .AllowAnyMethod()
+                        .WithOrigins("http://localhost:5173")
+
+                );
+            });
+
             var app = builder.Build();
             var scope = app.Services.CreateScope();
 
+            app.UseCors("FrontEndClient");
 
             var seeder = scope.ServiceProvider.GetRequiredService<IApplicationSeeder>();
             await seeder.SeedAsync();
