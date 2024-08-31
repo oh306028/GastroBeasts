@@ -37,9 +37,7 @@ namespace App.Controllers
             return Ok(categories);
         }
 
-        //TO DO:
-        //IN SERVICE COMMENTS!
-        //NOT WORKING PROPERLY YET
+
 
         [HttpGet("{restaurantId}/categories")]
         public ActionResult<IEnumerable<RestaurantCategoriesDto>> GetRestaurantCategories([FromRoute] int restaurantId) 
