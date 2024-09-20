@@ -95,12 +95,14 @@ namespace App
                 };
             });
 
-
+            
             builder.Services.AddCors(options =>
             {
                 options.AddPolicy("FrontEndClient", builder =>
                         builder.AllowAnyHeader()
                         .AllowAnyMethod()
+                         .AllowAnyHeader()
+                        .WithExposedHeaders("Location") 
                         .WithOrigins("http://localhost:5173")
 
                 );
