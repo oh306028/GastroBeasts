@@ -20,6 +20,7 @@ namespace App.Entities
 
         public virtual List<Review> Reviews { get; set; } = new List<Review>();
 
+        public virtual List<Restaurant> CreatedRestaurant { get; set; } = new List<Restaurant>();   
 
     }
 }

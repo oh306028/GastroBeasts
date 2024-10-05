@@ -22,6 +22,9 @@ namespace App.Entities
         public virtual List<Review> Reviews { get; set; } = new List<Review>();
 
 
+ 
+        public int UserId { get; set; }
+        public virtual User CreatedBy { get; set; }
 
     }
 }

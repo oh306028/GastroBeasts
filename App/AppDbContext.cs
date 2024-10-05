@@ -34,6 +34,10 @@ namespace App
                 r.HasOne(a => a.Address)
                  .WithOne(r => r.Restaurant);
 
+                r.HasOne(u => u.CreatedBy)
+                .WithMany(r => r.CreatedRestaurant)
+                .HasForeignKey(k => k.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             });
 
@@ -72,7 +76,7 @@ namespace App
                 rc.HasOne(c => c.Restaurant)
                .WithMany(r => r.RestaurantCategories)
                .HasForeignKey(k => k.RestaurantId)
-               .OnDelete(DeleteBehavior.Restrict);
+               .OnDelete(DeleteBehavior.Cascade);
 
             });
                
@@ -163,6 +167,8 @@ namespace App
                     Rating = "GastroBeast"
                 }
                 );
+
+         
 
         }
 

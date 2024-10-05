@@ -39,9 +39,6 @@ namespace App.Services
 
 
 
-        //TO DO:
-        //query below takes only the last ids
-        //refactor it to take all the categories
         public IEnumerable<RestaurantCategoriesDto> GetAllRestaurantCategories(int restaurantId)    
         {
             var restaurant = _dbContext.Restaurants.FirstOrDefault(i => i.Id == restaurantId);

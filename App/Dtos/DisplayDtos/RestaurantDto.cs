@@ -10,7 +10,7 @@ namespace App.Dtos.DisplayDtos
         public AddressDto Address { get; set; }
         public List<CategoryDto> Categories { get; set; }
 
-        public List<Review> Reviews { get; set; }
+        public List<ReviewDto> Reviews { get; set; }    
 
 
     }
